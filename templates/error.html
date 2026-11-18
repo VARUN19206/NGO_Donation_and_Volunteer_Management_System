@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "_macros.html" import logo %}
+
+{% block title %}Error {{ code }} | {{ brand_name }}{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block body %}
+<main class="error-shell">
+  <div class="auth-card">
+    <div class="brand">{{ logo(46) }}<div class="brand-text"><strong>{{ brand_short }}</strong><span>Management System</span></div></div>
+    <h1>{{ code }}</h1>
+    <p class="subtitle">{{ message }}</p>
+    <a class="btn btn-primary btn-block" href="{{ url_for('auth.index') }}">Go to home</a>
+  </div>
+</main>
+{% endblock %}

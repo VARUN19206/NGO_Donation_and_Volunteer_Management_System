@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, logo, flashes %}
+
+{% block body_class %}auth-page{% endblock %}
+
+{% block body %}
+<main class="auth-shell">
+  <section class="auth-hero" aria-hidden="true">
+    <div class="hero-orbit orbit-1"></div>
+    <div class="hero-orbit orbit-2"></div>
+    <div class="hero-dot dot-1"></div>
+    <div class="hero-dot dot-2"></div>
+    <div class="hero-dot dot-3"></div>
+    <div class="hero-heart">{{ icon('heart', 64) }}</div>
+    <div class="hero-copy">
+      <h2>Be the reason someone smiles today</h2>
+      <p>Join our community of donors, volunteers and change-makers.</p>
+    </div>
+  </section>
+
+  <section class="auth-panel">
+    <div class="auth-card">
+      <div class="brand">
+        {{ logo(46) }}
+        <div class="brand-text">
+          <strong>{{ brand_short }}</strong>
+          <span>Management System</span>
+        </div>
+      </div>
+      {% block form_area %}{% endblock %}
+    </div>
+  </section>
+</main>
+{% endblock %}

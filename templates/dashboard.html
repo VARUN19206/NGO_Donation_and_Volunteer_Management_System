@@ -1,0 +1,39 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon %}
+
+{% block title %}{{ role_label }} Dashboard | {{ brand_name }}{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>{{ role_label }} Dashboard</h1>
+    <p>Thank you for being a part of our mission!</p>
+  </div>
+  <span class="role-badge role-{{ user.role }}">{{ role_label }}</span>
+</header>
+
+<section class="welcome-card">
+  <div>
+    <h2>Welcome, {{ user.full_name }}!</h2>
+    <p>You are logged in securely as <strong>{{ role_label }}</strong>.</p>
+  </div>
+  <div class="welcome-art" aria-hidden="true">{{ icon('heart', 44) }}</div>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <h3>Account details</h3>
+    <dl class="details">
+      <div><dt>Full name</dt><dd>{{ user.full_name }}</dd></div>
+      <div><dt>Email</dt><dd>{{ user.email }}</dd></div>
+      <div><dt>Role</dt><dd>{{ role_label }}</dd></div>
+      <div><dt>Member since</dt><dd>{{ user.created_at.strftime('%d %b %Y') }}</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <h3>Your access</h3>
+    <p class="muted">{{ role_info }}</p>
+  </section>
+</div>
+{% endblock %}

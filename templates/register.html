@@ -1,0 +1,60 @@
+{% extends "auth_base.html" %}
+{% from "_macros.html" import icon, flashes %}
+
+{% block title %}Register | {{ brand_name }}{% endblock %}
+
+{% block form_area %}
+<h1>Create Account</h1>
+<p class="subtitle">Register to join our community</p>
+
+{{ flashes() }}
+
+<form method="post" action="{{ url_for('auth.register') }}" novalidate data-register-form>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <fieldset class="role-tabs two" aria-label="Register as">
+    <legend class="sr-only">Register as</legend>
+    <label><input type="radio" name="role" value="donor" {{ 'checked' if selected == 'donor' }}><span>{{ icon('heart', 16) }} Donor</span></label>
+    <label><input type="radio" name="role" value="volunteer" {{ 'checked' if selected == 'volunteer' }}><span>{{ icon('users', 16) }} Volunteer</span></label>
+  </fieldset>
+
+  <div class="form-group">
+    <label for="full_name">Full name</label>
+    <div class="field">
+      {{ icon('user') }}
+      <input id="full_name" name="full_name" type="text" autocomplete="name" placeholder="Enter your full name" value="{{ form.get('full_name', '') }}" maxlength="100" required autofocus>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="email">Email</label>
+    <div class="field">
+      {{ icon('mail') }}
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="Enter your email" value="{{ form.get('email', '') }}" maxlength="120" required>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="password">Password</label>
+    <div class="field">
+      {{ icon('lock') }}
+      <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Create a password" minlength="8" required>
+      <button type="button" class="toggle-pw" data-toggle-password="password" aria-label="Show password">{{ icon('eye') }}</button>
+    </div>
+    <small class="hint">At least 8 characters with a letter and a number.</small>
+  </div>
+
+  <div class="form-group">
+    <label for="confirm_password">Confirm password</label>
+    <div class="field">
+      {{ icon('lock') }}
+      <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" placeholder="Re-enter your password" required>
+      <button type="button" class="toggle-pw" data-toggle-password="confirm_password" aria-label="Show password">{{ icon('eye') }}</button>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+</form>
+
+<p class="switch-link">Already have an account? <a href="{{ url_for('auth.login', role=selected) }}">Login</a></p>
+{% endblock %}

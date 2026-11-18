@@ -1,0 +1,43 @@
+{% extends "auth_base.html" %}
+{% from "_macros.html" import icon, flashes %}
+
+{% block title %}Login | {{ brand_name }}{% endblock %}
+
+{% block form_area %}
+<h1>Welcome Back</h1>
+<p class="subtitle">Login to your account to continue</p>
+
+{{ flashes() }}
+
+<form method="post" action="{{ url_for('auth.login') }}" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <fieldset class="role-tabs" aria-label="Login as">
+    <legend class="sr-only">Login as</legend>
+    <label><input type="radio" name="role" value="donor" {{ 'checked' if selected == 'donor' }}><span>{{ icon('heart', 16) }} Donor</span></label>
+    <label><input type="radio" name="role" value="volunteer" {{ 'checked' if selected == 'volunteer' }}><span>{{ icon('users', 16) }} Volunteer</span></label>
+    <label><input type="radio" name="role" value="admin" {{ 'checked' if selected == 'admin' }}><span>{{ icon('shield', 16) }} Admin</span></label>
+  </fieldset>
+
+  <div class="form-group">
+    <label for="email">Email</label>
+    <div class="field">
+      {{ icon('mail') }}
+      <input id="email" name="email" type="email" autocomplete="username" placeholder="Enter your email" value="{{ email }}" required autofocus>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="password">Password</label>
+    <div class="field">
+      {{ icon('lock') }}
+      <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+      <button type="button" class="toggle-pw" data-toggle-password="password" aria-label="Show password">{{ icon('eye') }}</button>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary btn-block">Login</button>
+</form>
+
+<p class="switch-link">Don't have an account? <a href="{{ url_for('auth.register', role=selected if selected != 'admin' else 'donor') }}">Register</a></p>
+{% endblock %}
