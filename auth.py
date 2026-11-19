@@ -3,7 +3,7 @@ import re
 from functools import wraps
 
 import pymysql
-from flask import (Blueprint, flash, redirect, render_template, request,
+from flask import (Blueprint, flash, g, redirect, render_template, request,
                    session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -27,22 +27,39 @@ HOME_ENDPOINT = {
 }
 
 ROLE_INFO = {
-    "donor": "You can see your account here. Browsing campaigns, donating and your donation history come in the next modules.",
-    "volunteer": "You can see your account here. Volunteer tasks come in the next modules.",
-    "campaign_admin": "You can see your account here. Creating and managing campaigns comes in the next modules.",
-    "platform_admin": "You can see your account here. Managing users and records comes in the next modules.",
+    "donor": "You can browse campaigns and read their details. Donating and your donation history come in the next modules.",
+    "volunteer": "You can browse campaigns and read their details. Volunteer tasks come in the next modules.",
+    "campaign_admin": "You can create campaigns and edit the campaigns you created from Manage Campaigns.",
+    "platform_admin": "You can create campaigns and edit any campaign from Manage Campaigns. Managing users and records comes in the next modules.",
 }
 
 
 # ---------- helpers ----------
 
 def current_user():
+    """The logged-in user (or None). Looked up once per request."""
+    if "_user" in g:
+        return g._user
     uid = session.get("user_id")
-    if not uid:
-        return None
-    return db.query_one(
-        "SELECT user_id, full_name, email, role, created_at FROM users "
-        "WHERE user_id = %s AND is_active = 1", (uid,))
+    g._user = None
+    if uid:
+        g._user = db.query_one(
+            "SELECT user_id, full_name, email, role, created_at FROM users "
+            "WHERE user_id = %s AND is_active = 1", (uid,))
+    return g._user
+
+
+def nav_for(role):
+    """Sidebar links for a role. Later modules add more items here."""
+    items = [{"key": "dashboard", "label": "Dashboard", "icon": "home",
+              "endpoint": HOME_ENDPOINT[role]}]
+    if role in ("campaign_admin", "platform_admin"):
+        items.append({"key": "campaigns", "label": "Manage Campaigns", "icon": "megaphone",
+                      "endpoint": "campaigns.manage"})
+    else:
+        items.append({"key": "campaigns", "label": "Campaigns", "icon": "megaphone",
+                      "endpoint": "campaigns.listing"})
+    return items
 
 
 def login_required(view):
@@ -96,8 +113,8 @@ def validate_registration(form):
 
 # ---------- pages ----------
 
-@bp.route("/")
-def index():
+@bp.route("/dashboard")
+def dashboard_redirect():
     user = current_user()
     if user:
         return redirect(url_for(HOME_ENDPOINT[user["role"]]))
@@ -107,7 +124,7 @@ def index():
 @bp.route("/register", methods=["GET", "POST"])
 def register():
     if current_user():
-        return redirect(url_for("auth.index"))
+        return redirect(url_for("auth.dashboard_redirect"))
 
     selected = request.values.get("role", "donor")
     if selected not in config.SELF_REGISTER_ROLES:
@@ -141,7 +158,7 @@ def register():
 @bp.route("/login", methods=["GET", "POST"])
 def login():
     if current_user():
-        return redirect(url_for("auth.index"))
+        return redirect(url_for("auth.dashboard_redirect"))
 
     selected = request.values.get("role", "donor")
     if selected not in config.TAB_ROLES:

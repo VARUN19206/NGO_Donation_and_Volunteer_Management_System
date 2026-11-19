@@ -1,0 +1,45 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon %}
+
+{% block title %}Manage Campaigns | {{ brand_name }}{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Manage Campaigns</h1>
+    <p>{{ 'All campaigns' if user.role == 'platform_admin' else 'Campaigns you created' }}</p>
+  </div>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('campaigns.create') }}">{{ icon('plus', 16) }} New Campaign</a>
+</header>
+
+<section class="card table-card">
+  {% if campaigns %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Campaign</th><th>Category</th><th>Goal</th><th>Status</th>
+          {% if user.role == 'platform_admin' %}<th>Created by</th>{% endif %}
+          <th class="right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in campaigns %}
+        <tr>
+          <td><a href="{{ url_for('campaigns.detail', campaign_id=c.campaign_id) }}">{{ c.title }}</a></td>
+          <td>{{ categories[c.category].label }}</td>
+          <td>{{ c.goal_amount|inr }}</td>
+          <td><span class="badge badge-{{ c.status }}">{{ 'Active' if c.status == 'active' else 'Closed' }}</span></td>
+          {% if user.role == 'platform_admin' %}<td>{{ c.organiser }}</td>{% endif %}
+          <td class="right"><a class="btn btn-secondary btn-sm" href="{{ url_for('campaigns.edit', campaign_id=c.campaign_id) }}">{{ icon('edit', 14) }} Edit</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="empty">You have not created any campaigns yet.
+      <a href="{{ url_for('campaigns.create') }}">Create your first campaign</a>.</div>
+  {% endif %}
+</section>
+{% endblock %}

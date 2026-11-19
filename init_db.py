@@ -1,4 +1,4 @@
-"""Creates the database and the users table, then adds 4 demo accounts.
+"""Creates the database, the users and campaigns tables, then adds demo accounts and sample campaigns.
 
 Run once:   python init_db.py
 Skip demo:  python init_db.py --no-demo
@@ -35,6 +35,39 @@ def run_schema():
         conn.close()
 
 
+SAMPLE_CAMPAIGNS = [
+    ("Education Support", "education", 150000,
+     "Help children from low-income families continue their schooling. Funds will go towards books, uniforms, school fees and learning materials.\n\nEvery contribution helps a child stay in the classroom."),
+    ("Food Distribution", "food", 80000,
+     "Provide nutritious meals to families who struggle to afford daily food. The campaign supports weekly food packets and community meal events.\n\nNo family should go to bed hungry."),
+    ("Medical Camp", "health", 120000,
+     "Organise free health check-up camps in rural areas, with basic tests, doctor consultations and essential medicines for people who cannot afford care."),
+]
+
+
+def add_sample_campaigns():
+    """Adds 3 sample campaigns (only when there are none) owned by the demo campaign admin."""
+    conn = db.connect()
+    added = 0
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) AS n FROM campaigns")
+            if cur.fetchone()["n"]:
+                return 0
+            cur.execute("SELECT user_id FROM users WHERE email = %s", ("campaign.admin@example.com",))
+            owner = cur.fetchone()
+            if not owner:
+                return 0
+            for title, cat, goal, desc in SAMPLE_CAMPAIGNS:
+                cur.execute(
+                    "INSERT INTO campaigns (title, description, category, goal_amount, created_by) "
+                    "VALUES (%s, %s, %s, %s, %s)", (title, desc, cat, goal, owner["user_id"]))
+                added += 1
+    finally:
+        conn.close()
+    return added
+
+
 def add_demo_users():
     conn = db.connect()
     added = 0
@@ -64,10 +97,11 @@ if __name__ == "__main__":
         print("Check that MySQL is running and that DB_USER / DB_PASSWORD in .env are correct.")
         sys.exit(1)
 
-    print(f"Database '{config.DB_NAME}' and table 'users' are ready.")
+    print(f"Database '{config.DB_NAME}' and tables 'users', 'campaigns' are ready.")
     if "--no-demo" not in sys.argv:
         added = add_demo_users()
         print(f"Demo accounts added: {added} (password for all: {DEMO_PASSWORD})")
         for name, email, role in DEMO_USERS:
             print(f"  {config.ROLE_LABELS[role]:<15} {email}")
         print("Demo accounts are only for testing. Remove them before real use.")
+        print(f"Sample campaigns added: {add_sample_campaigns()}")

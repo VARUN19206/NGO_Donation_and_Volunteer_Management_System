@@ -9,7 +9,8 @@ from flask import Flask, abort, request, session
 
 import config
 import db
-from auth import bp as auth_bp
+from auth import bp as auth_bp, current_user, nav_for
+from campaigns import bp as campaigns_bp, inr
 
 
 def create_app():
@@ -21,6 +22,9 @@ def create_app():
     )
     app.teardown_appcontext(db.close_db)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(campaigns_bp)
+    app.jinja_env.filters["inr"] = inr
+    app.jinja_env.globals.update(categories=config.CATEGORIES, role_labels=config.ROLE_LABELS)
 
     # ---- CSRF protection for every POST form ----
     def csrf_token():
@@ -40,6 +44,8 @@ def create_app():
     @app.context_processor
     def inject_globals():
         return {"csrf_token": csrf_token,
+                "nav_user": current_user(),
+                "nav_for": nav_for,
                 "brand_name": config.BRAND_NAME,
                 "brand_short": config.BRAND_SHORT}
 

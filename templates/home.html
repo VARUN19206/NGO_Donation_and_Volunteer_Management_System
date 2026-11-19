@@ -1,0 +1,54 @@
+{% extends "public_base.html" %}
+{% from "_macros.html" import icon, campaign_card %}
+
+{% block title %}Home | {{ brand_name }}{% endblock %}
+
+{% block hero %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-text">
+      <h1>Together We<br>Create a Better Tomorrow</h1>
+      <p>Join hands with us to support underprivileged communities through education, healthcare and stable development.</p>
+      <div class="hero-actions">
+        <a class="btn btn-green btn-lg" href="{{ url_for('campaigns.listing') }}">View Campaigns</a>
+        {% if nav_user %}
+          <a class="btn btn-outline btn-lg" href="{{ url_for('auth.dashboard_redirect') }}">Go to Dashboard</a>
+        {% else %}
+          <a class="btn btn-outline btn-lg" href="{{ url_for('auth.register') }}">Join Us</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="hero-tiles" aria-hidden="true">
+      <div class="tile tile-1 cat-education">{{ icon('book', 34) }}<span>Education</span></div>
+      <div class="tile tile-2 cat-food">{{ icon('food', 34) }}<span>Food</span></div>
+      <div class="tile tile-3 cat-health">{{ icon('health', 34) }}<span>Health</span></div>
+      <div class="tile-heart">{{ icon('heart', 44) }}</div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block public %}
+<section class="stats" aria-label="At a glance">
+  <div class="stat"><span class="stat-icon s-blue">{{ icon('megaphone', 22) }}</span>
+    <div><strong>{{ stats.campaigns }}</strong><span>Active Campaigns</span></div></div>
+  <div class="stat"><span class="stat-icon s-green">{{ icon('heart', 22) }}</span>
+    <div><strong>{{ stats.donors }}</strong><span>Registered Donors</span></div></div>
+  <div class="stat"><span class="stat-icon s-teal">{{ icon('users', 22) }}</span>
+    <div><strong>{{ stats.volunteers }}</strong><span>Registered Volunteers</span></div></div>
+</section>
+
+<section class="section" id="ongoing">
+  <div class="section-head">
+    <h2>Our Ongoing Campaigns</h2>
+    <a href="{{ url_for('campaigns.listing') }}">View All {{ icon('arrow', 16) }}</a>
+  </div>
+  {% if featured %}
+    <div class="camp-grid">
+      {% for c in featured %}{{ campaign_card(c) }}{% endfor %}
+    </div>
+  {% else %}
+    <div class="empty">No active campaigns yet. Please check back soon.</div>
+  {% endif %}
+</section>
+{% endblock %}

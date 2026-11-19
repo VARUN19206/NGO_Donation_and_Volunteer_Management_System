@@ -1,0 +1,22 @@
+{% extends "public_base.html" %}
+{% from "_macros.html" import icon, campaign_card %}
+
+{% block title %}Campaigns | {{ brand_name }}{% endblock %}
+
+{% block public %}
+<section class="section">
+  <div class="section-head page-title">
+    <div>
+      <h1>Campaigns</h1>
+      <p class="muted">Choose a campaign to read what it is about.</p>
+    </div>
+  </div>
+  {% if campaigns %}
+    <div class="camp-grid">
+      {% for c in campaigns %}{{ campaign_card(c) }}{% endfor %}
+    </div>
+  {% else %}
+    <div class="empty">No active campaigns yet. Please check back soon.</div>
+  {% endif %}
+</section>
+{% endblock %}

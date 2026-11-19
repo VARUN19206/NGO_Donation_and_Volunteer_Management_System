@@ -1,0 +1,38 @@
+{% extends "public_base.html" %}
+{% from "_macros.html" import icon %}
+
+{% block title %}{{ c.title }} | {{ brand_name }}{% endblock %}
+
+{% block public %}
+<div class="narrow">
+  <a class="back-link" href="{{ url_for('campaigns.listing') }}">{{ icon('back', 16) }} All campaigns</a>
+
+  <article class="detail-card">
+    <div class="detail-banner cat-{{ c.category }}">
+      {{ icon(categories[c.category].icon, 64) }}
+    </div>
+    <div class="detail-body">
+      <div class="badges">
+        <span class="badge badge-cat">{{ categories[c.category].label }}</span>
+        <span class="badge badge-{{ c.status }}">{{ 'Active' if c.status == 'active' else 'Closed' }}</span>
+      </div>
+      <h1>{{ c.title }}</h1>
+
+      <dl class="facts">
+        <div><dt>Goal amount</dt><dd>{{ c.goal_amount|inr }}</dd></div>
+        <div><dt>Organised by</dt><dd>{{ c.organiser }}</dd></div>
+        <div><dt>Started on</dt><dd>{{ c.created_at.strftime('%d %b %Y') }}</dd></div>
+      </dl>
+
+      <h2>About this campaign</h2>
+      <div class="prose">{{ c.description }}</div>
+
+      {% if can_edit %}
+        <div class="detail-actions">
+          <a class="btn btn-secondary" href="{{ url_for('campaigns.edit', campaign_id=c.campaign_id) }}">{{ icon('edit', 16) }} Edit campaign</a>
+        </div>
+      {% endif %}
+    </div>
+  </article>
+</div>
+{% endblock %}

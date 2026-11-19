@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, logo, flashes %}
+
+{% block body_class %}public-page{% endblock %}
+
+{% block body %}
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="topbar-brand" href="{{ url_for('campaigns.home') }}">
+      {{ logo(36) }}<span>{{ brand_short }}</span>
+    </a>
+    <nav class="topnav" aria-label="Main">
+      <a href="{{ url_for('campaigns.home') }}" class="{{ 'active' if active_nav == 'home' }}">Home</a>
+      <a href="{{ url_for('campaigns.listing') }}" class="{{ 'active' if active_nav == 'campaigns' }}">Campaigns</a>
+    </nav>
+    <div class="topbar-actions">
+      {% if nav_user %}
+        <a class="topnav-link" href="{{ url_for('auth.dashboard_redirect') }}">Dashboard</a>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-ghost btn-sm">Logout</button>
+        </form>
+      {% else %}
+        <a class="topnav-link" href="{{ url_for('auth.login') }}">Login</a>
+        <a class="btn btn-green btn-sm" href="{{ url_for('auth.register') }}">Register</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<main class="public-main">
+  {% block hero %}{% endblock %}
+  <div class="container">
+    {{ flashes() }}
+    {% block public %}{% endblock %}
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">{{ brand_name }}</div>
+</footer>
+{% endblock %}
