@@ -36,3 +36,13 @@ TAB_ROLES = {
 # Only these roles can create an account themselves.
 # Admin accounts are created by the project team (see init_db.py).
 SELF_REGISTER_ROLES = ("donor", "volunteer")
+
+# Campaign categories -> label and icon name (see templates/_macros.html)
+CATEGORIES = {
+    "education": {"label": "Education", "icon": "book"},
+    "food": {"label": "Food", "icon": "food"},
+    "health": {"label": "Health", "icon": "health"},
+    "shelter": {"label": "Shelter", "icon": "home"},
+    "other": {"label": "Other", "icon": "heart"},
+}
+CAMPAIGN_STATUSES = ("active", "closed")

@@ -43,3 +43,9 @@ def execute(sql, params=()):
     with get_db().cursor() as cur:
         cur.execute(sql, params)
         return cur.lastrowid
+
+
+def all_rows(sql, params=()):
+    with get_db().cursor() as cur:
+        cur.execute(sql, params)
+        return cur.fetchall()

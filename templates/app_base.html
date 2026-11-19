@@ -18,15 +18,14 @@
       <span class="avatar">{{ user.full_name[:1]|upper }}</span>
       <div>
         <strong>{{ user.full_name }}</strong>
-        <span>{{ role_label }}</span>
+        <span>{{ role_labels[user.role] }}</span>
       </div>
     </div>
 
     <nav class="side-nav" aria-label="Main">
-      {# Later modules add their links here (Campaigns, Donations, Tasks ...) #}
-      {% block nav %}
-      <a class="active" href="{{ request.path }}" aria-current="page">{{ icon('home') }} Dashboard</a>
-      {% endblock %}
+      {% for item in nav_for(user.role) %}
+      <a href="{{ url_for(item.endpoint) }}" class="{{ 'active' if item.key == active_nav }}" {{ 'aria-current=page' if item.key == active_nav }}>{{ icon(item.icon) }} {{ item.label }}</a>
+      {% endfor %}
     </nav>
 
     <form method="post" action="{{ url_for('auth.logout') }}" class="logout-form">
