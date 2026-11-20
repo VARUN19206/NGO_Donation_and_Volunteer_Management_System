@@ -1,0 +1,44 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon %}
+
+{% block title %}My Donations | {{ brand_name }}{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>My Donations</h1>
+    <p>Your donation history (simulated test transactions)</p>
+  </div>
+  <a class="btn btn-green btn-sm" href="{{ url_for('campaigns.listing') }}">{{ icon('heart', 16) }} Donate to a campaign</a>
+</header>
+
+<section class="dash-stats two" aria-label="Summary">
+  <div class="stat"><span class="stat-icon s-green">{{ icon('heart', 22) }}</span>
+    <div><strong>{{ total|inr }}</strong><span>Total Donated (test)</span></div></div>
+  <div class="stat"><span class="stat-icon s-amber">{{ icon('receipt', 22) }}</span>
+    <div><strong>{{ donations|length }}</strong><span>Donations Made</span></div></div>
+</section>
+
+<section class="card table-card">
+  {% if donations %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Date</th><th>Campaign</th><th>Amount</th><th>Test reference</th></tr></thead>
+      <tbody>
+        {% for r in donations %}
+        <tr>
+          <td>{{ r.created_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+          <td><a href="{{ url_for('campaigns.detail', campaign_id=r.campaign_id) }}">{{ r.title }}</a></td>
+          <td><strong>{{ r.amount|inr }}</strong></td>
+          <td><a href="{{ url_for('donations.confirmation', donation_id=r.donation_id) }}"><code>{{ r.transaction_ref }}</code></a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="empty">You have not made any donations yet.
+      <a href="{{ url_for('campaigns.listing') }}">Browse campaigns</a> and make your first test donation.</div>
+  {% endif %}
+</section>
+{% endblock %}

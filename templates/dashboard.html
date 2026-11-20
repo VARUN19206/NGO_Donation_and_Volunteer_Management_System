@@ -21,6 +21,42 @@
   <div class="welcome-art" aria-hidden="true">{{ icon('heart', 44) }}</div>
 </section>
 
+{% if user.role == 'donor' %}
+<section class="dash-stats" aria-label="Your giving">
+  <div class="stat"><span class="stat-icon s-green">{{ icon('heart', 22) }}</span>
+    <div><strong>{{ summary.total|inr }}</strong><span>Total Donated (test)</span></div></div>
+  <div class="stat"><span class="stat-icon s-blue">{{ icon('megaphone', 22) }}</span>
+    <div><strong>{{ summary.campaigns }}</strong><span>Campaigns Supported</span></div></div>
+  <div class="stat"><span class="stat-icon s-amber">{{ icon('receipt', 22) }}</span>
+    <div><strong>{{ summary.donations }}</strong><span>Donations Made</span></div></div>
+</section>
+
+<section class="card table-card recent-card">
+  <div class="card-head">
+    <h3>Recent Donations</h3>
+    <a href="{{ url_for('donations.history') }}">View all {{ icon('arrow', 14) }}</a>
+  </div>
+  {% if recent %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Campaign</th><th>Amount</th><th>Date</th><th>Test reference</th></tr></thead>
+      <tbody>
+        {% for r in recent %}
+        <tr>
+          <td>{{ r.title }}</td><td><strong>{{ r.amount|inr }}</strong></td>
+          <td>{{ r.created_at.strftime('%d %b %Y') }}</td><td><code>{{ r.transaction_ref }}</code></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="empty">You have not made any donations yet.
+      <a href="{{ url_for('campaigns.listing') }}">Browse campaigns</a>.</div>
+  {% endif %}
+</section>
+{% endif %}
+
 <div class="grid-2">
   <section class="card">
     <h3>Account details</h3>

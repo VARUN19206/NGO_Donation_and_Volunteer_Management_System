@@ -27,7 +27,7 @@ HOME_ENDPOINT = {
 }
 
 ROLE_INFO = {
-    "donor": "You can browse campaigns and read their details. Donating and your donation history come in the next modules.",
+    "donor": "You can donate to active campaigns (simulated test transactions only) and see your donation history under My Donations.",
     "volunteer": "You can browse campaigns and read their details. Volunteer tasks come in the next modules.",
     "campaign_admin": "You can create campaigns and edit the campaigns you created from Manage Campaigns.",
     "platform_admin": "You can create campaigns and edit any campaign from Manage Campaigns. Managing users and records comes in the next modules.",
@@ -59,7 +59,17 @@ def nav_for(role):
     else:
         items.append({"key": "campaigns", "label": "Campaigns", "icon": "megaphone",
                       "endpoint": "campaigns.listing"})
+    if role == "donor":
+        items.append({"key": "donations", "label": "My Donations", "icon": "receipt",
+                      "endpoint": "donations.history"})
     return items
+
+
+def safe_next(value):
+    """Only allow a redirect to a page on this site (blocks //evil.com and http://evil.com)."""
+    if value and value.startswith("/") and not value.startswith("//") and "\\" not in value:
+        return value
+    return None
 
 
 def login_required(view):
@@ -69,18 +79,19 @@ def login_required(view):
         if user is None:
             session.clear()
             flash("Please log in to continue.", "info")
-            return redirect(url_for("auth.login"))
+            target = request.path if request.method == "GET" else None
+            return redirect(url_for("auth.login", next=target))
         return view(user, *args, **kwargs)
     return wrapped
 
 
-def role_required(*roles):
+def role_required(*roles, message="You do not have access to that page."):
     def decorator(view):
         @login_required
         @wraps(view)
         def wrapped(user, *args, **kwargs):
             if user["role"] not in roles:
-                flash("You do not have access to that page.", "error")
+                flash(message, "error")
                 return redirect(url_for(HOME_ENDPOINT[user["role"]]))
             return view(user, *args, **kwargs)
         return wrapped
@@ -129,6 +140,7 @@ def register():
     selected = request.values.get("role", "donor")
     if selected not in config.SELF_REGISTER_ROLES:
         selected = "donor"
+    nxt = safe_next(request.values.get("next"))
 
     if request.method == "POST":
         values, errors = validate_registration(request.form)
@@ -147,12 +159,12 @@ def register():
             else:
                 flash("Account created. Please log in.", "success")
                 tab = values["role"]
-                return redirect(url_for("auth.login", role=tab))
+                return redirect(url_for("auth.login", role=tab, next=nxt))
         for e in errors:
             flash(e, "error")
         return render_template("register.html", selected=selected,
-                               form=values), 400
-    return render_template("register.html", selected=selected, form={})
+                               form=values, next=nxt), 400
+    return render_template("register.html", selected=selected, form={}, next=nxt)
 
 
 @bp.route("/login", methods=["GET", "POST"])
@@ -163,6 +175,7 @@ def login():
     selected = request.values.get("role", "donor")
     if selected not in config.TAB_ROLES:
         selected = "donor"
+    nxt = safe_next(request.values.get("next"))
 
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
@@ -177,12 +190,12 @@ def login():
         if allowed:
             session.clear()                      # new session after login
             session["user_id"] = user["user_id"]
-            return redirect(url_for(HOME_ENDPOINT[user["role"]]))
+            return redirect(nxt or url_for(HOME_ENDPOINT[user["role"]]))
         # One message for every failure so nothing is revealed about accounts.
         flash("Invalid email or password for the selected role.", "error")
         return render_template("login.html", selected=selected,
-                               email=email), 401
-    return render_template("login.html", selected=selected, email="")
+                               email=email, next=nxt), 401
+    return render_template("login.html", selected=selected, email="", next=nxt)
 
 
 @bp.route("/logout", methods=["POST"])
@@ -194,16 +207,25 @@ def logout():
 
 # ---------- role dashboards (Module 1 shows account details only) ----------
 
-def _dashboard(user, active):
+def _dashboard(user, active, **extra):
     return render_template("dashboard.html", user=user, active=active,
                            role_label=config.ROLE_LABELS[user["role"]],
-                           role_info=ROLE_INFO[user["role"]])
+                           role_info=ROLE_INFO[user["role"]], **extra)
 
 
 @bp.route("/donor")
 @role_required("donor")
 def donor_dashboard(user):
-    return _dashboard(user, "donor")
+    summary = db.query_one(
+        "SELECT COALESCE(SUM(amount), 0) AS total, COUNT(*) AS donations, "
+        "COUNT(DISTINCT campaign_id) AS campaigns FROM donations WHERE donor_id = %s",
+        (user["user_id"],))
+    recent = db.all_rows(
+        "SELECT d.donation_id, d.amount, d.transaction_ref, d.created_at, c.title "
+        "FROM donations d JOIN campaigns c ON c.campaign_id = d.campaign_id "
+        "WHERE d.donor_id = %s ORDER BY d.created_at DESC, d.donation_id DESC LIMIT 5",
+        (user["user_id"],))
+    return _dashboard(user, "donor", summary=summary, recent=recent)
 
 
 @bp.route("/volunteer")

@@ -24,6 +24,25 @@
         <div><dt>Started on</dt><dd>{{ c.created_at.strftime('%d %b %Y') }}</dd></div>
       </dl>
 
+      {% set pct = c.raised|percent(c.goal_amount) %}
+      <div class="raise-box">
+        <div class="raise-top">
+          <div><strong>{{ c.raised|inr }}</strong> raised of {{ c.goal_amount|inr }} goal</div>
+          <span class="raise-pct">{{ pct }}%</span>
+        </div>
+        <div class="progress big" role="progressbar" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ pct }}%"></span></div>
+        {% if c.status != 'active' %}
+          <p class="muted small">This campaign is closed and is not accepting donations.</p>
+        {% elif nav_user and nav_user.role != 'donor' %}
+          <p class="muted small">Only donors can make donations.</p>
+        {% else %}
+          <div class="raise-actions">
+            <a class="btn btn-green btn-lg" href="{{ url_for('donations.donate', campaign_id=c.campaign_id) }}">Donate Now</a>
+            <span class="muted small">{{ icon('info', 14) }} Donations are simulated test transactions. No real money is charged.</span>
+          </div>
+        {% endif %}
+      </div>
+
       <h2>About this campaign</h2>
       <div class="prose">{{ c.description }}</div>
 

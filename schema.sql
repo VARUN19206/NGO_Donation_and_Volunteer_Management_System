@@ -37,3 +37,20 @@ CREATE TABLE IF NOT EXISTS campaigns (
   KEY idx_campaigns_status (status),
   CONSTRAINT fk_campaigns_user FOREIGN KEY (created_by) REFERENCES users (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Module 3 (Increment 3): Donation Management
+-- Donations are SIMULATED test transactions. No real payment gateway is used.
+CREATE TABLE IF NOT EXISTS donations (
+  donation_id     INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  campaign_id     INT UNSIGNED  NOT NULL,
+  donor_id        INT UNSIGNED  NOT NULL,
+  amount          DECIMAL(12,2) NOT NULL,
+  transaction_ref VARCHAR(20)   NOT NULL,          -- test reference such as TEST-1A2B3C4D5E
+  created_at      TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (donation_id),
+  UNIQUE KEY uq_donations_ref (transaction_ref),
+  KEY idx_donations_campaign (campaign_id),
+  KEY idx_donations_donor (donor_id),
+  CONSTRAINT fk_donations_campaign FOREIGN KEY (campaign_id) REFERENCES campaigns (campaign_id),
+  CONSTRAINT fk_donations_donor FOREIGN KEY (donor_id) REFERENCES users (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

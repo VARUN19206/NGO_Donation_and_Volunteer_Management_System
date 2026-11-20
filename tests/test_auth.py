@@ -26,6 +26,8 @@ class AuthTests(unittest.TestCase):
     def setUp(self):
         conn = db.connect()
         with conn.cursor() as cur:
+            cur.execute("DELETE FROM donations WHERE donor_id IN (SELECT user_id FROM "
+                        "(SELECT user_id FROM users WHERE email LIKE '%@t.example') x)")
             cur.execute("DELETE FROM users WHERE email LIKE '%@t.example'")
         conn.close()
         self.client = create_app().test_client()

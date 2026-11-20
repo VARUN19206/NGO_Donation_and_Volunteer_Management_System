@@ -1,4 +1,4 @@
-"""Creates the database, the users and campaigns tables, then adds demo accounts and sample campaigns.
+"""Creates the database, the users, campaigns and donations tables, then adds demo accounts and sample campaigns.
 
 Run once:   python init_db.py
 Skip demo:  python init_db.py --no-demo
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         print("Check that MySQL is running and that DB_USER / DB_PASSWORD in .env are correct.")
         sys.exit(1)
 
-    print(f"Database '{config.DB_NAME}' and tables 'users', 'campaigns' are ready.")
+    print(f"Database '{config.DB_NAME}' and tables 'users', 'campaigns', 'donations' are ready.")
     if "--no-demo" not in sys.argv:
         added = add_demo_users()
         print(f"Demo accounts added: {added} (password for all: {DEMO_PASSWORD})")
