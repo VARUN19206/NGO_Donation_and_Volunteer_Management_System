@@ -1,0 +1,29 @@
+{% extends "public_base.html" %}
+{% from "_macros.html" import icon %}
+
+{% block title %}Donation saved | {{ brand_name }}{% endblock %}
+
+{% block public %}
+<div class="narrow">
+  <section class="card confirm-card">
+    <div class="confirm-icon">{{ icon('check', 42) }}</div>
+    <h1>Donation saved</h1>
+    <p class="muted">Thank you for supporting <strong>{{ d.title }}</strong>.</p>
+    <div class="confirm-amount">{{ d.amount|inr }}</div>
+    <span class="badge badge-test">Simulated test transaction</span>
+
+    <dl class="details confirm-details">
+      <div><dt>Campaign</dt><dd>{{ d.title }}</dd></div>
+      <div><dt>Amount</dt><dd>{{ d.amount|inr }}</dd></div>
+      <div><dt>Test reference</dt><dd><code>{{ d.transaction_ref }}</code></dd></div>
+      <div><dt>Date and time</dt><dd>{{ d.created_at.strftime('%d %b %Y, %I:%M %p') }}</dd></div>
+      <div><dt>Donor</dt><dd>{{ nav_user.full_name }}</dd></div>
+    </dl>
+
+    <div class="confirm-actions">
+      <a class="btn btn-primary" href="{{ url_for('donations.history') }}">View My Donations</a>
+      <a class="btn btn-secondary" href="{{ url_for('campaigns.listing') }}">Back to Campaigns</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

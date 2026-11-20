@@ -11,6 +11,7 @@
 
 <form method="post" action="{{ url_for('auth.login') }}" novalidate>
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
 
   <fieldset class="role-tabs" aria-label="Login as">
     <legend class="sr-only">Login as</legend>
@@ -39,5 +40,5 @@
   <button type="submit" class="btn btn-primary btn-block">Login</button>
 </form>
 
-<p class="switch-link">Don't have an account? <a href="{{ url_for('auth.register', role=selected if selected != 'admin' else 'donor') }}">Register</a></p>
+<p class="switch-link">Don't have an account? <a href="{{ url_for('auth.register', role=selected if selected != 'admin' else 'donor', next=next) }}">Register</a></p>
 {% endblock %}

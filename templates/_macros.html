@@ -20,6 +20,9 @@
 {%- elif name == 'arrow' %}<path d="M5 12h14"/><path d="M12 5l7 7-7 7"/>
 {%- elif name == 'plus' %}<path d="M12 5v14M5 12h14"/>
 {%- elif name == 'edit' %}<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+{%- elif name == 'receipt' %}<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
+{%- elif name == 'check' %}<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/>
+{%- elif name == 'info' %}<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
 {%- elif name == 'back' %}<path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>
 {%- endif %}</svg>
 {%- endmacro %}
@@ -51,6 +54,8 @@
   <div class="camp-body">
     <h3><a class="stretch" href="{{ url_for('campaigns.detail', campaign_id=c.campaign_id) }}">{{ c.title }}</a></h3>
     <p>{{ c.description|replace('\n', ' ')|truncate(115) }}</p>
+    <div class="progress" role="progressbar" aria-valuenow="{{ c.raised|percent(c.goal_amount) }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ c.raised|percent(c.goal_amount) }}%"></span></div>
+    <div class="progress-row"><span><strong>{{ c.raised|inr }}</strong> raised</span><span>{{ c.raised|percent(c.goal_amount) }}%</span></div>
     <div class="camp-meta">
       <span>{{ icon('target', 16) }} Goal <strong>{{ c.goal_amount|inr }}</strong></span>
       <span class="more">View details {{ icon('arrow', 16) }}</span>

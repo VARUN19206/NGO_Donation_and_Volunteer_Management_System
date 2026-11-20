@@ -46,6 +46,8 @@ class CampaignTests(unittest.TestCase):
         self.cleanup()
 
     def cleanup(self):
+        sql("DELETE FROM donations WHERE campaign_id IN "
+            "(SELECT campaign_id FROM (SELECT campaign_id FROM campaigns WHERE title LIKE %s) x)", ("TEST %",))
         sql("DELETE FROM campaigns WHERE title LIKE %s", ("TEST %",))
         sql("DELETE FROM users WHERE email = %s", (OTHER_ADMIN,))
 

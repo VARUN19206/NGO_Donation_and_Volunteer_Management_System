@@ -45,3 +45,11 @@ document.querySelectorAll("form").forEach(function (f) {
     if (b) { b.disabled = true; }
   });
 });
+
+// Quick amount buttons on the donate page
+document.querySelectorAll("[data-amount]").forEach(function (chip) {
+  chip.addEventListener("click", function () {
+    var input = document.getElementById("amount");
+    if (input) { input.value = chip.getAttribute("data-amount"); input.focus(); }
+  });
+});

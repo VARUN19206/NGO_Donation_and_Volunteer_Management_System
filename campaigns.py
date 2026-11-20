@@ -33,11 +33,21 @@ def inr(value):
     return "₹" + whole + (f".{paise:02d}" if paise else "")
 
 
+def percent(raised, goal):
+    """Progress bar value, 0 to 100."""
+    goal = Decimal(goal)
+    if goal <= 0:
+        return 0
+    return int(min(Decimal(100), Decimal(raised) * 100 / goal))
+
+
 # ---------- helpers ----------
 
 CAMPAIGN_SELECT = (
     "SELECT c.campaign_id, c.title, c.description, c.category, c.goal_amount, "
-    "c.status, c.created_by, c.created_at, u.full_name AS organiser "
+    "c.status, c.created_by, c.created_at, u.full_name AS organiser, "
+    "COALESCE((SELECT SUM(d.amount) FROM donations d "
+    "WHERE d.campaign_id = c.campaign_id), 0) AS raised "
     "FROM campaigns c JOIN users u ON u.user_id = c.created_by ")
 
 
@@ -90,6 +100,7 @@ def home():
         "campaigns": db.query_one("SELECT COUNT(*) AS n FROM campaigns WHERE status = 'active'")["n"],
         "donors": db.query_one("SELECT COUNT(*) AS n FROM users WHERE role = 'donor' AND is_active = 1")["n"],
         "volunteers": db.query_one("SELECT COUNT(*) AS n FROM users WHERE role = 'volunteer' AND is_active = 1")["n"],
+        "donations": db.query_one("SELECT COUNT(*) AS n FROM donations")["n"],
     }
     return render_template("home.html", featured=featured, stats=stats, active_nav="home")
 

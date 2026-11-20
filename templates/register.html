@@ -11,6 +11,7 @@
 
 <form method="post" action="{{ url_for('auth.register') }}" novalidate data-register-form>
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
 
   <fieldset class="role-tabs two" aria-label="Register as">
     <legend class="sr-only">Register as</legend>
@@ -56,5 +57,5 @@
   <button type="submit" class="btn btn-primary btn-block">Create Account</button>
 </form>
 
-<p class="switch-link">Already have an account? <a href="{{ url_for('auth.login', role=selected) }}">Login</a></p>
+<p class="switch-link">Already have an account? <a href="{{ url_for('auth.login', role=selected, next=next) }}">Login</a></p>
 {% endblock %}

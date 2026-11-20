@@ -1,0 +1,50 @@
+{% extends "public_base.html" %}
+{% from "_macros.html" import icon %}
+
+{% block title %}Donate to {{ c.title }} | {{ brand_name }}{% endblock %}
+
+{% block public %}
+{% set pct = c.raised|percent(c.goal_amount) %}
+<div class="narrow wide">
+  <a class="back-link" href="{{ url_for('campaigns.detail', campaign_id=c.campaign_id) }}">{{ icon('back', 16) }} Back to campaign</a>
+
+  <div class="donate-grid">
+    <article class="card donate-summary">
+      <div class="mini-banner cat-{{ c.category }}">{{ icon(categories[c.category].icon, 40) }}</div>
+      <div class="donate-summary-body">
+        <span class="badge badge-cat">{{ categories[c.category].label }}</span>
+        <h2>{{ c.title }}</h2>
+        <p class="muted">{{ c.description|replace('\n', ' ')|truncate(150) }}</p>
+        <div class="progress" role="progressbar" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ pct }}%"></span></div>
+        <div class="progress-row"><span><strong>{{ c.raised|inr }}</strong> raised</span><span>Goal {{ c.goal_amount|inr }}</span></div>
+      </div>
+    </article>
+
+    <section class="card donate-form">
+      <h1>Make a Donation</h1>
+      <div class="test-notice">
+        {{ icon('info', 20) }}
+        <div><strong>Simulated test transaction.</strong>
+          No real money is charged and no payment gateway is used. A test reference number is saved with your donation.</div>
+      </div>
+
+      <form method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+          <label for="amount">Donation amount</label>
+          <div class="field money">
+            <span class="prefix">₹</span>
+            <input id="amount" name="amount" type="text" inputmode="decimal" autocomplete="off" placeholder="Enter amount" value="{{ entered }}" required autofocus>
+          </div>
+          <div class="chips" aria-label="Quick amounts">
+            {% for q in quick %}<button type="button" class="chip" data-amount="{{ q }}">₹{{ '{:,}'.format(q) }}</button>{% endfor %}
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-green btn-block btn-lg">Donate (test)</button>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}
