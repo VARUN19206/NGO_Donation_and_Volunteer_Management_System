@@ -57,6 +57,42 @@
 </section>
 {% endif %}
 
+{% if user.role == 'volunteer' %}
+<section class="dash-stats" aria-label="Your tasks">
+  <div class="stat"><span class="stat-icon s-blue">{{ icon('tasks', 22) }}</span>
+    <div><strong>{{ counts.assigned }}</strong><span>Tasks Assigned</span></div></div>
+  <div class="stat"><span class="stat-icon s-amber">{{ icon('calendar', 22) }}</span>
+    <div><strong>{{ counts.in_progress|int }}</strong><span>In Progress</span></div></div>
+  <div class="stat"><span class="stat-icon s-green">{{ icon('check', 22) }}</span>
+    <div><strong>{{ counts.completed|int }}</strong><span>Completed</span></div></div>
+</section>
+
+<section class="card table-card recent-card">
+  <div class="card-head">
+    <h3>Upcoming Tasks</h3>
+    <a href="{{ url_for('tasks.mine') }}">View all {{ icon('arrow', 14) }}</a>
+  </div>
+  {% if upcoming %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Task</th><th>Campaign</th><th>Due</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for t in upcoming %}
+        <tr>
+          <td><strong>{{ t.title }}</strong></td><td>{{ t.campaign_title }}</td>
+          <td>{{ t.due_date.strftime('%d %b %Y') if t.due_date else '-' }}</td>
+          <td><span class="badge tstatus-{{ t.status }}">{{ {'pending': 'To do', 'in_progress': 'In progress'}[t.status] }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="empty">No open tasks right now.</div>
+  {% endif %}
+</section>
+{% endif %}
+
 <div class="grid-2">
   <section class="card">
     <h3>Account details</h3>

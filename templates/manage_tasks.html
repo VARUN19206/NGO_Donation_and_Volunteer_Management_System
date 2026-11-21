@@ -1,0 +1,38 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon %}
+
+{% block title %}Manage Tasks | {{ brand_name }}{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Manage Tasks</h1>
+    <p>{{ 'Tasks of all campaigns' if user.role == 'platform_admin' else 'Tasks of the campaigns you created' }}</p>
+  </div>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('tasks.create') }}">{{ icon('plus', 16) }} New Task</a>
+</header>
+
+<section class="card table-card">
+  {% if tasks %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Task</th><th>Campaign</th><th>Volunteer</th><th>Due</th><th>Status</th><th class="right">Actions</th></tr></thead>
+      <tbody>
+        {% for t in tasks %}
+        <tr>
+          <td><strong>{{ t.title }}</strong></td>
+          <td>{{ t.campaign_title }}</td>
+          <td>{{ t.volunteer_name }}</td>
+          <td>{% if t.due_date %}<span class="{{ 'overdue-text' if t.due_date < today and t.status != 'completed' }}">{{ t.due_date.strftime('%d %b %Y') }}</span>{% else %}-{% endif %}</td>
+          <td><span class="badge tstatus-{{ t.status }}">{{ statuses[t.status] }}</span></td>
+          <td class="right"><a class="btn btn-secondary btn-sm" href="{{ url_for('tasks.edit', task_id=t.task_id) }}">{{ icon('edit', 14) }} Edit</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="empty">No tasks yet. <a href="{{ url_for('tasks.create') }}">Create the first task</a>.</div>
+  {% endif %}
+</section>
+{% endblock %}

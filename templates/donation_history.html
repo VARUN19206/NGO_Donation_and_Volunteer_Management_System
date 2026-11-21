@@ -23,7 +23,7 @@
   {% if donations %}
   <div class="table-wrap">
     <table class="table">
-      <thead><tr><th>Date</th><th>Campaign</th><th>Amount</th><th>Test reference</th></tr></thead>
+      <thead><tr><th>Date</th><th>Campaign</th><th>Amount</th><th>Test reference</th><th class="right">Receipt</th></tr></thead>
       <tbody>
         {% for r in donations %}
         <tr>
@@ -31,6 +31,7 @@
           <td><a href="{{ url_for('campaigns.detail', campaign_id=r.campaign_id) }}">{{ r.title }}</a></td>
           <td><strong>{{ r.amount|inr }}</strong></td>
           <td><a href="{{ url_for('donations.confirmation', donation_id=r.donation_id) }}"><code>{{ r.transaction_ref }}</code></a></td>
+          <td class="right"><a class="btn btn-secondary btn-sm" href="{{ url_for('donations.receipt', donation_id=r.donation_id) }}">{{ icon('receipt', 14) }} PDF</a></td>
         </tr>
         {% endfor %}
       </tbody>

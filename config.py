@@ -1,6 +1,7 @@
 """Settings are read from the .env file (see .env.example)."""
 import os
 import secrets
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -46,3 +47,22 @@ CATEGORIES = {
     "other": {"label": "Other", "icon": "heart"},
 }
 CAMPAIGN_STATUSES = ("active", "closed")
+
+# ---- Task status labels (Module 4) ----
+TASK_STATUSES = {"pending": "To do", "in_progress": "In progress", "completed": "Completed"}
+
+# ---- Uploads (photo proof for campaign updates) ----
+APP_DIR = Path(__file__).resolve().parent
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR") or APP_DIR / "uploads")
+MAX_PHOTO_UPLOAD_BYTES = 8 * 1024 * 1024        # each photo, before it is resized
+MAX_PHOTOS_PER_UPDATE = 4
+
+# ---- Email ----
+OUTBOX_DIR = Path(os.getenv("OUTBOX_DIR") or APP_DIR / "outbox")
+SMTP_HOST = os.getenv("SMTP_HOST", "").strip()
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587") or "587")
+SMTP_USER = os.getenv("SMTP_USER", "").strip()
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+SMTP_FROM = os.getenv("SMTP_FROM", "").strip() or SMTP_USER or "no-reply@ngo.example"
+SMTP_TLS = os.getenv("SMTP_TLS", "true").strip().lower() in ("1", "true", "yes")
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:5000").rstrip("/")

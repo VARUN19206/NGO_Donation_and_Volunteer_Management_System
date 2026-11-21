@@ -28,9 +28,9 @@ HOME_ENDPOINT = {
 
 ROLE_INFO = {
     "donor": "You can donate to active campaigns (simulated test transactions only) and see your donation history under My Donations.",
-    "volunteer": "You can browse campaigns and read their details. Volunteer tasks come in the next modules.",
-    "campaign_admin": "You can create campaigns and edit the campaigns you created from Manage Campaigns.",
-    "platform_admin": "You can create campaigns and edit any campaign from Manage Campaigns. Managing users and records comes in the next modules.",
+    "volunteer": "You can browse campaigns, see the tasks assigned to you under My Tasks and update their status.",
+    "campaign_admin": "You can create and edit your campaigns, and create tasks and assign them to volunteers.",
+    "platform_admin": "You can create and edit any campaign and manage all volunteer tasks. Managing users and records comes in the next module.",
 }
 
 
@@ -56,12 +56,19 @@ def nav_for(role):
     if role in ("campaign_admin", "platform_admin"):
         items.append({"key": "campaigns", "label": "Manage Campaigns", "icon": "megaphone",
                       "endpoint": "campaigns.manage"})
+        items.append({"key": "tasks", "label": "Manage Tasks", "icon": "tasks",
+                      "endpoint": "tasks.manage"})
     else:
         items.append({"key": "campaigns", "label": "Campaigns", "icon": "megaphone",
                       "endpoint": "campaigns.listing"})
     if role == "donor":
         items.append({"key": "donations", "label": "My Donations", "icon": "receipt",
                       "endpoint": "donations.history"})
+        items.append({"key": "tracker", "label": "Donation Tracker", "icon": "target",
+                      "endpoint": "updates.tracker"})
+    if role == "volunteer":
+        items.append({"key": "tasks", "label": "My Tasks", "icon": "tasks",
+                      "endpoint": "tasks.mine"})
     return items
 
 
@@ -231,7 +238,17 @@ def donor_dashboard(user):
 @bp.route("/volunteer")
 @role_required("volunteer")
 def volunteer_dashboard(user):
-    return _dashboard(user, "volunteer")
+    counts = db.query_one(
+        "SELECT COUNT(*) AS assigned, "
+        "COALESCE(SUM(status = 'in_progress'), 0) AS in_progress, "
+        "COALESCE(SUM(status = 'completed'), 0) AS completed "
+        "FROM tasks WHERE assigned_to = %s", (user["user_id"],))
+    upcoming = db.all_rows(
+        "SELECT t.task_id, t.title, t.due_date, t.status, c.title AS campaign_title "
+        "FROM tasks t JOIN campaigns c ON c.campaign_id = t.campaign_id "
+        "WHERE t.assigned_to = %s AND t.status <> 'completed' "
+        "ORDER BY t.due_date IS NULL, t.due_date, t.task_id LIMIT 5", (user["user_id"],))
+    return _dashboard(user, "volunteer", counts=counts, upcoming=upcoming)
 
 
 @bp.route("/admin")

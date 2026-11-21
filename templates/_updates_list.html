@@ -1,0 +1,17 @@
+{% if updates %}
+<div class="timeline">
+  {% for u in updates %}
+  <article class="tl-item">
+    <div class="tl-date">{{ u.created_at.strftime('%d %b %Y') }}</div>
+    <h3>{{ u.title }}</h3>
+    <p class="prose">{{ u.description }}</p>
+    {% if u.amount_used is not none %}<p class="tl-used"><strong>Amount used:</strong> {{ u.amount_used|inr }}</p>{% endif %}
+    <div class="photo-grid">
+      {% for f in u.images %}<a href="{{ url_for('updates.photo', name=f) }}" target="_blank" rel="noopener"><img src="{{ url_for('updates.photo', name=f) }}" alt="Proof photo for {{ u.title }}" loading="lazy"></a>{% endfor %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+  <p class="muted">No updates have been posted yet. The campaign team will add photos here to show how the donations were used.</p>
+{% endif %}

@@ -31,7 +31,8 @@
           <td>{{ c.goal_amount|inr }}</td>
           <td><span class="badge badge-{{ c.status }}">{{ 'Active' if c.status == 'active' else 'Closed' }}</span></td>
           {% if user.role == 'platform_admin' %}<td>{{ c.organiser }}</td>{% endif %}
-          <td class="right"><a class="btn btn-secondary btn-sm" href="{{ url_for('campaigns.edit', campaign_id=c.campaign_id) }}">{{ icon('edit', 14) }} Edit</a></td>
+          <td class="right"><a class="btn btn-green btn-sm" href="{{ url_for('updates.create', campaign_id=c.campaign_id) }}">{{ icon('plus', 14) }} Post update</a>
+            <a class="btn btn-secondary btn-sm" href="{{ url_for('campaigns.edit', campaign_id=c.campaign_id) }}">{{ icon('edit', 14) }} Edit</a></td>
         </tr>
         {% endfor %}
       </tbody>

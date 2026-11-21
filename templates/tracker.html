@@ -1,0 +1,21 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}Donation Tracker | {{ brand_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div><h1>Donation Tracker</h1><p>Updates with photo proof from the campaigns you supported</p></div>
+</header>
+{% for c in camps %}
+<section class="card tracker-card">
+  <div class="card-head">
+    <h3><a href="{{ url_for('campaigns.detail', campaign_id=c.campaign_id) }}">{{ c.title }}</a></h3>
+    <span class="muted small">You donated {{ c.given|inr }} (test) in {{ c.n }} donation{{ 's' if c.n != 1 }}</span>
+  </div>
+  {% set updates = c.updates %}
+  {% include "_updates_list.html" %}
+  <p class="muted small">These are updates from the whole campaign. They show how donations to this campaign were used, not a trace of your individual amount.</p>
+</section>
+{% else %}
+  <div class="empty">You have not donated yet. <a href="{{ url_for('campaigns.listing') }}">Browse campaigns</a>.</div>
+{% endfor %}
+{% endblock %}
