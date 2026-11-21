@@ -93,6 +93,16 @@
 </section>
 {% endif %}
 
+{% if user.role in ('campaign_admin', 'platform_admin') %}
+<section class="dash-stats four" aria-label="Overview">
+  <div class="stat"><span class="stat-icon s-blue">{{ icon('megaphone', 22) }}</span><div><strong>{{ stats.campaigns }}</strong><span>Campaigns</span></div></div>
+  <div class="stat"><span class="stat-icon s-green">{{ icon('heart', 22) }}</span><div><strong>{{ stats.raised|inr }}</strong><span>Raised (test)</span></div></div>
+  <div class="stat"><span class="stat-icon s-amber">{{ icon('receipt', 22) }}</span><div><strong>{{ stats.donations }}</strong><span>Donations</span></div></div>
+  <div class="stat"><span class="stat-icon s-blue">{{ icon('tasks', 22) }}</span><div><strong>{{ stats.tasks }}</strong><span>Tasks</span></div></div>
+</section>
+{% if people %}<p class="muted">Active users: {{ people.donors|int }} donors and {{ people.volunteers|int }} volunteers. <a href="{{ url_for('admin.users') }}">Manage users</a></p>{% endif %}
+{% endif %}
+
 <div class="grid-2">
   <section class="card">
     <h3>Account details</h3>
@@ -104,9 +114,6 @@
     </dl>
   </section>
 
-  <section class="card">
-    <h3>Your access</h3>
-    <p class="muted">{{ role_info }}</p>
-  </section>
+  
 </div>
 {% endblock %}

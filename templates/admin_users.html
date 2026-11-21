@@ -1,0 +1,40 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}Manage Users | {{ brand_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div><h1>Manage Users</h1><p>All registered accounts. Deactivated users cannot log in.</p></div>
+</header>
+<nav class="filter-tabs" aria-label="Filter by role">
+  <a class="{{ 'on' if not role }}" href="{{ url_for('admin.users') }}">All</a>
+  {% for key, label in role_labels.items() %}<a class="{{ 'on' if role == key }}" href="{{ url_for('admin.users', role=key) }}">{{ label }}</a>{% endfor %}
+</nav>
+<section class="card table-card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Status</th><th class="right">Action</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td><strong>{{ r.full_name }}</strong></td><td>{{ r.email }}</td><td>{{ role_labels[r.role] }}</td>
+          <td>{{ r.created_at.strftime('%d %b %Y') }}</td>
+          <td><span class="badge {{ 'badge-active' if r.is_active else 'badge-closed' }}">{{ 'Active' if r.is_active else 'Deactivated' }}</span></td>
+          <td class="right">
+            {% if r.user_id != user.user_id and (not r.is_active or r.role != 'platform_admin') %}
+            <form method="post" action="{{ url_for('admin.set_active', user_id=r.user_id) }}" class="inline-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="role" value="{{ role }}">
+              <input type="hidden" name="active" value="{{ 0 if r.is_active else 1 }}">
+              <button class="btn btn-secondary btn-sm" type="submit">{{ 'Deactivate' if r.is_active else 'Activate' }}</button>
+            </form>
+            {% else %}<span class="muted small">-</span>{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6"><div class="empty">No users found.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

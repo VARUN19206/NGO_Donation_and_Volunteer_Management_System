@@ -1,0 +1,27 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}Reports | {{ brand_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div><h1>Reports</h1><p>Campaign summary from the saved records. Amounts are simulated test donations.</p></div>
+  <a class="btn btn-secondary btn-sm" href="{{ url_for('admin.reports_csv') }}">{{ icon('receipt', 16) }} Download CSV</a>
+</header>
+<section class="dash-stats" aria-label="Totals">
+  <div class="stat"><span class="stat-icon s-green">{{ icon('heart', 22) }}</span><div><strong>{{ totals.raised|inr }}</strong><span>Raised (test)</span></div></div>
+  <div class="stat"><span class="stat-icon s-amber">{{ icon('receipt', 22) }}</span><div><strong>{{ totals.donations }}</strong><span>Donations</span></div></div>
+  <div class="stat"><span class="stat-icon s-blue">{{ icon('tasks', 22) }}</span><div><strong>{{ totals.tasks_done }} / {{ totals.tasks }}</strong><span>Tasks completed</span></div></div>
+</section>
+<section class="card table-card">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Campaign</th><th>Status</th><th>Goal</th><th>Raised</th><th>Progress</th><th>Donors</th><th>Donations</th><th>Tasks done</th></tr></thead>
+    <tbody>{% for r in rows %}
+      <tr><td><strong>{{ r.title }}</strong></td>
+      <td><span class="badge badge-{{ r.status }}">{{ 'Active' if r.status == 'active' else 'Closed' }}</span></td>
+      <td>{{ r.goal_amount|inr }}</td><td>{{ r.raised|inr }}</td><td>{{ r.raised|percent(r.goal_amount) }}%</td>
+      <td>{{ r.donors }}</td><td>{{ r.donations }}</td><td>{{ r.tasks_done|int }} / {{ r.tasks }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% else %}<div class="empty">No campaigns yet.</div>{% endif %}
+</section>
+{% endblock %}

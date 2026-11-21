@@ -53,6 +53,7 @@ def build_receipt(d, donor_name, donor_email):
     c.drawString(left + 4 * mm, y - 8 * mm,
                  "Thank you for your generous donation")
 
+
     y -= 28 * mm
     rows = [("Receipt / test reference", d["transaction_ref"]),
             ("Date and time", d["created_at"].strftime("%d %b %Y, %I:%M %p")),

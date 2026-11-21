@@ -29,8 +29,8 @@ HOME_ENDPOINT = {
 ROLE_INFO = {
     "donor": "You can donate to active campaigns (simulated test transactions only) and see your donation history under My Donations.",
     "volunteer": "You can browse campaigns, see the tasks assigned to you under My Tasks and update their status.",
-    "campaign_admin": "You can create and edit your campaigns, and create tasks and assign them to volunteers.",
-    "platform_admin": "You can create and edit any campaign and manage all volunteer tasks. Managing users and records comes in the next module.",
+    "campaign_admin": "You can manage your campaigns, tasks and volunteers, and view the donation records and reports of your campaigns.",
+    "platform_admin": "You can manage all campaigns, tasks, donation records and reports, and activate or deactivate user accounts.",
 }
 
 
@@ -58,6 +58,13 @@ def nav_for(role):
                       "endpoint": "campaigns.manage"})
         items.append({"key": "tasks", "label": "Manage Tasks", "icon": "tasks",
                       "endpoint": "tasks.manage"})
+        items.append({"key": "donations", "label": "Donation Records", "icon": "receipt",
+                      "endpoint": "admin.donations"})
+        items.append({"key": "reports", "label": "Reports", "icon": "target",
+                      "endpoint": "admin.reports"})
+        if role == "platform_admin":
+            items.append({"key": "users", "label": "Manage Users", "icon": "users",
+                          "endpoint": "admin.users"})
     else:
         items.append({"key": "campaigns", "label": "Campaigns", "icon": "megaphone",
                       "endpoint": "campaigns.listing"})
@@ -254,4 +261,19 @@ def volunteer_dashboard(user):
 @bp.route("/admin")
 @role_required("campaign_admin", "platform_admin")
 def admin_dashboard(user):
-    return _dashboard(user, "admin")
+    if user["role"] == "platform_admin":
+        where, args = "1 = 1", ()
+    else:
+        where, args = "c.created_by = %s", (user["user_id"],)
+    stats = db.query_one(
+        "SELECT (SELECT COUNT(*) FROM campaigns c WHERE " + where + ") AS campaigns, "
+        "(SELECT COALESCE(SUM(d.amount), 0) FROM donations d JOIN campaigns c ON c.campaign_id = d.campaign_id WHERE " + where + ") AS raised, "
+        "(SELECT COUNT(*) FROM donations d JOIN campaigns c ON c.campaign_id = d.campaign_id WHERE " + where + ") AS donations, "
+        "(SELECT COUNT(*) FROM tasks t JOIN campaigns c ON c.campaign_id = t.campaign_id WHERE " + where + ") AS tasks",
+        args * 4)
+    people = None
+    if user["role"] == "platform_admin":
+        people = db.query_one(
+            "SELECT COALESCE(SUM(role = 'donor'), 0) AS donors, COALESCE(SUM(role = 'volunteer'), 0) AS volunteers "
+            "FROM users WHERE is_active = 1")
+    return _dashboard(user, "admin", stats=stats, people=people)
