@@ -3,6 +3,7 @@
 Run:  DB_NAME=ngo_donation_test python init_db.py   (once)
       DB_NAME=ngo_donation_test python -m unittest discover -s tests -v
 """
+import _env  # noqa: F401
 import os
 import re
 import sys

@@ -117,7 +117,8 @@ def detail(campaign_id):
     campaign = get_campaign(campaign_id)
     if campaign is None:
         abort(404)
-    return render_template("campaign_detail.html", c=campaign,
+    from updates import updates_for
+    return render_template("campaign_detail.html", c=campaign, updates=updates_for(campaign_id),
                            can_edit=can_edit(current_user(), campaign),
                            active_nav="campaigns")
 

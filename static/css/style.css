@@ -427,3 +427,41 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
 }
 @media (max-width: 600px) { .stats { grid-template-columns: 1fr; } }
 .donate-summary-body .badge { justify-self: start; }
+
+/* =====================================================================
+   Module 4: volunteer tasks
+   ===================================================================== */
+.task-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start; }
+.task-col-head { font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin: 0 0 10px;
+  display: flex; align-items: center; gap: 8px; }
+.task-col-head span { background: #e8eef7; color: var(--navy); border-radius: 999px; padding: 1px 9px; font-size: 12px; }
+.col-pending { color: #4a5a73; }
+.col-in_progress { color: #b86e00; }
+.col-completed { color: #0b6e47; }
+.task-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 12px; display: grid; gap: 8px; }
+.task-card h3 { font-size: 16px; color: var(--navy); margin: 0; }
+.task-card p { color: #3d4c63; font-size: 14px; }
+.task-camp { font-size: 13px; }
+.task-meta { font-size: 13px; color: var(--muted); }
+.due { display: inline-flex; align-items: center; gap: 6px; }
+.overdue { color: var(--danger); font-weight: 700; }
+.overdue-text { color: var(--danger); font-weight: 700; }
+.task-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.task-empty { padding: 18px; text-align: center; color: #9aa7ba; border: 1px dashed var(--border); border-radius: 12px; font-size: 14px; }
+.tstatus-pending { background: #eef0f4; color: #4a5a73; }
+.tstatus-in_progress { background: #fff3dc; color: #8a5300; }
+.tstatus-completed { background: var(--green-soft); color: #0b6e47; }
+@media (max-width: 900px) { .task-board { grid-template-columns: 1fr; } }
+
+/* =====================================================================
+   Donation impact: updates timeline, photos, tracker
+   ===================================================================== */
+.timeline { display: grid; gap: 16px; margin: 8px 0 20px; }
+.tl-item { border-left: 3px solid var(--green, #1faa6b); padding: 2px 0 2px 16px; }
+.tl-item h3 { margin: 2px 0 6px; color: var(--navy); font-size: 17px; }
+.tl-date { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+.tl-used { margin: 6px 0; }
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
+.photo-grid img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); display: block; }
+.tracker-card { margin-bottom: 18px; }
+.small { font-size: 13px; }

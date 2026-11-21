@@ -21,6 +21,7 @@
     </dl>
 
     <div class="confirm-actions">
+      <a class="btn btn-green" href="{{ url_for('donations.receipt', donation_id=d.donation_id) }}">{{ icon('receipt', 16) }} Download Receipt (PDF)</a>
       <a class="btn btn-primary" href="{{ url_for('donations.history') }}">View My Donations</a>
       <a class="btn btn-secondary" href="{{ url_for('campaigns.listing') }}">Back to Campaigns</a>
     </div>

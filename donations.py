@@ -7,12 +7,13 @@ import secrets
 from decimal import Decimal
 
 import pymysql
-from flask import (Blueprint, abort, flash, redirect, render_template, request,
+from flask import (Blueprint, Response, abort, flash, redirect, render_template, request,
                    url_for)
 
 import db
 from auth import role_required
 from campaigns import get_campaign
+from receipt import build_receipt
 
 bp = Blueprint("donations", __name__)
 
@@ -101,3 +102,17 @@ def history(user):
     total = sum((r["amount"] for r in rows), Decimal("0"))
     return render_template("donation_history.html", user=user, donations=rows, total=total,
                            active_nav="donations")
+
+
+@bp.route("/donations/<int:donation_id>/receipt")
+@role_required("donor", message=ONLY_DONORS)
+def receipt(user, donation_id):
+    row = db.query_one(
+        "SELECT d.amount, d.transaction_ref, d.created_at, c.title "
+        "FROM donations d JOIN campaigns c ON c.campaign_id = d.campaign_id "
+        "WHERE d.donation_id = %s AND d.donor_id = %s", (donation_id, user["user_id"]))
+    if row is None:
+        abort(404)
+    pdf = build_receipt(row, user["full_name"], user["email"])
+    return Response(pdf, mimetype="application/pdf", headers={
+        "Content-Disposition": f'attachment; filename="receipt-{row["transaction_ref"]}.pdf"'})

@@ -46,8 +46,12 @@
       <h2>About this campaign</h2>
       <div class="prose">{{ c.description }}</div>
 
+      <h2 id="updates">Where the donations helped</h2>
+      {% include "_updates_list.html" %}
+
       {% if can_edit %}
         <div class="detail-actions">
+          <a class="btn btn-green" href="{{ url_for('updates.create', campaign_id=c.campaign_id) }}">{{ icon('plus', 16) }} Post update with photos</a>
           <a class="btn btn-secondary" href="{{ url_for('campaigns.edit', campaign_id=c.campaign_id) }}">{{ icon('edit', 16) }} Edit campaign</a>
         </div>
       {% endif %}
