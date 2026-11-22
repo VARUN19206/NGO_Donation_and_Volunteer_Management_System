@@ -14,6 +14,7 @@ from campaigns import bp as campaigns_bp, inr, percent
 from donations import bp as donations_bp
 from tasks import bp as tasks_bp
 from updates import bp as updates_bp
+from admin import bp as admin_bp
 
 
 def create_app():
@@ -30,6 +31,7 @@ def create_app():
     app.register_blueprint(donations_bp)
     app.register_blueprint(tasks_bp)
     app.register_blueprint(updates_bp)
+    app.register_blueprint(admin_bp)
     app.jinja_env.filters["inr"] = inr
     app.jinja_env.filters["percent"] = percent
     app.jinja_env.globals.update(categories=config.CATEGORIES, role_labels=config.ROLE_LABELS)

@@ -1,5 +1,5 @@
 # NGO Donation and Volunteer Management System
-## Modules 1 to 4 (Increments 1 to 4) + receipt, donation tracker and email updates
+## Modules 1 to 5 (all increments) + receipt, donation tracker and email updates
 
 Python Flask + MySQL + HTML/CSS/JS, as in the approved synopsis.
 
@@ -8,11 +8,11 @@ Python Flask + MySQL + HTML/CSS/JS, as in the approved synopsis.
 | **1. Database and User Authentication** | `users` table, Register, Login, password hashing, roles | `auth.py`, `templates/login.html`, `register.html` |
 | **2. Campaign Management** | Home page, campaign list and details, create and edit campaign | `campaigns.py`, `templates/home.html`, `campaigns.html`, `campaign_detail.html`, `manage_campaigns.html`, `campaign_form.html` |
 | **4. Volunteer Management** | Admin creates tasks and assigns them to a volunteer; volunteer sees My Tasks and updates status (To do, In progress, Completed) | `tasks.py`, `templates/volunteer_tasks.html`, `manage_tasks.html`, `task_form.html` |
+| **5. Admin: Users, Records and Reports** | Platform admin activates/deactivates users; admins view donation records and campaign reports; CSV download | `admin.py`, `templates/admin_users.html`, `admin_donations.html`, `admin_reports.html` |
 | **Extra A: Receipt** | Donor downloads a PDF receipt after a donation | `receipt.py` |
 | **Extra B: Donation tracker + email** | Campaign admin posts an update with photo proof; donors of that campaign are emailed; donors follow updates on Donation Tracker | `updates.py`, `mailer.py`, `templates/update_form.html`, `tracker.html` |
 | **3. Donation Management** | Select campaign, enter amount, save donation record, confirmation, donation history | `donations.py`, `templates/donate.html`, `donation_confirmation.html`, `donation_history.html` |
 
-Reports and user management are **not** included (Module 5).
 
 > **Donations are simulated test transactions.** No real payment gateway is used and no money is charged. Every donation gets a test reference such as `TEST-1A2B3C4D5E`. The screens say so clearly.
 
@@ -43,12 +43,21 @@ Open **http://127.0.0.1:5000**
 | Donation confirmation | `/donations/<id>` | The donor who made it |
 | My Donations (history and total) | `/donor/donations` | Donors |
 | Role dashboard | `/donor`, `/volunteer`, `/admin` | Matching role only |
+| Manage Users | `/admin/users` | Platform Admin |
+| Donation Records / Reports (+ CSV) | `/admin/donations`, `/admin/reports` | Campaign Admin (own campaigns), Platform Admin |
 | Manage / Create / Edit campaign | `/manage/campaigns...` | Campaign Admin, Platform Admin |
 | Download receipt | `/donations/<id>/receipt` | The donor who made it |
 | Donation Tracker | `/donor/tracker` | Donors |
 | Post update with photos | `/manage/campaigns/<id>/updates/new` | Owner Campaign Admin, Platform Admin |
 | My Tasks / change status | `/volunteer/tasks` | Volunteers (own tasks only) |
 | Manage Tasks / New / Edit | `/manage/tasks...` | Campaign Admin (own campaigns), Platform Admin |
+
+## Module 5: admin tools
+- **Manage Users** (platform admin only): list by role, **Deactivate / Activate**. A deactivated user cannot log in and an already logged-in session stops working at once. You cannot deactivate yourself or a platform admin. Accounts are never deleted, so donation records stay intact.
+- **Donation Records:** every saved test donation with donor, campaign, amount and reference; filter by campaign; **Download CSV**.
+- **Reports:** per campaign goal, raised, progress, donors, donations and tasks completed, with totals; **Download CSV**.
+- **Who sees what:** the platform admin sees everything; a campaign admin sees only the records and reports of their own campaigns.
+- CSV cells starting with `=`, `+`, `-` or `@` are saved as text so Excel never runs them as formulas.
 
 ## Receipt, tracker and emails
 - **Receipt:** after a donation, **Download Receipt (PDF)** (also on My Donations). It is a **test receipt** and says so: no real payment, not valid for tax exemption. Amounts show as `Rs.` because the PDF font has no rupee sign.
@@ -91,7 +100,7 @@ It also adds 3 sample campaigns (Education Support, Food Distribution, Medical C
 - The "come back after login" link only accepts pages on this site (no redirect to other websites).
 - All database queries use parameters. All text shown on pages is escaped.
 
-## Tests (86)
+## Tests (99)
 ```
 set DB_NAME=ngo_donation_test        (PowerShell: $env:DB_NAME="ngo_donation_test")
 python init_db.py
@@ -111,6 +120,7 @@ campaigns.py    home page, campaign list/details, create/edit
 donations.py    donate (simulated), confirmation, history, receipt download
 tasks.py        volunteer tasks (admin and volunteer sides)
 updates.py      campaign updates with photos, donation tracker, donor emails
+admin.py        user management, donation records, reports, CSV
 receipt.py      PDF receipt          mailer.py   email sending / outbox
 db.py           MySQL connection helpers
 config.py       settings from .env, role and category names
