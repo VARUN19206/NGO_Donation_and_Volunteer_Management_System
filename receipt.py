@@ -48,11 +48,10 @@ def build_receipt(d, donor_name, donor_email):
     c.rect(left, y - 12 * mm, right - left, 14 * mm, stroke=1, fill=1)
     c.setFillColor(colors.HexColor("#8a5300"))
     c.setFont("Helvetica-Bold", 10)
-    c.drawCentredString(w / 2, y - 3 * mm, "NGO Donation Recipt")
+    c.drawString(left + 4 * mm, y - 3 * mm, "SIMULATED TEST TRANSACTION")
     c.setFont("Helvetica", 9)
     c.drawString(left + 4 * mm, y - 8 * mm,
-                 "Thank you for your generous donation")
-
+                 "No real payment was made. Not valid for tax exemption or as proof of payment.")
 
     y -= 28 * mm
     rows = [("Receipt / test reference", d["transaction_ref"]),

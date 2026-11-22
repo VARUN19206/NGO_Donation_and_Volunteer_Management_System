@@ -117,7 +117,7 @@ class AdminTests(Base):
         self.as_admin()
         csv_text = self.client.get("/admin/reports.csv").get_data(as_text=True)
         line = [l for l in csv_text.splitlines() if l.startswith(TITLE)][0]
-        self.assertEqual(line, f"{TITLE},active,1000.00,1000.00,2,2,1")
+        self.assertEqual(line, f"{TITLE},active,5000.00,1000.00,2,2,1")
         self.assertIn("₹1,000", self.client.get("/admin/reports").get_data(as_text=True))
 
     def test_csv_downloads_and_formula_injection_guard(self):

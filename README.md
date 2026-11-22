@@ -76,7 +76,8 @@ Browse Campaigns, select a campaign, **Donate Now**, Login or Register if needed
 ## Donation rules
 - Only users with the **Donor** role can donate. Volunteers and admins cannot.
 - Only **active** campaigns accept donations. Closed campaigns do not.
-- Amount: ₹1 to ₹1,00,00,000, up to 2 decimals (commas allowed, for example `1,250.50`).
+- Amount: at least ₹1, up to 2 decimals (commas allowed, for example `1,250.50`).
+- **A donation can never go past the campaign goal.** If a campaign needs ₹80,000 more and a donor enters ₹1,00,000, the payment is rejected with the message "Payment rejected ... Please donate ₹80,000 or less". The donate page shows how much is still needed. When the goal is reached, the Donate button is replaced by "Goal reached".
 - The raised amount and progress bar on every campaign are the sum of the saved test donations. Progress stops at 100%.
 - A donor can only see their own donations and confirmations.
 - Home page counts (campaigns, donors, volunteers, test donations) are live database counts. Nothing is made up. A fresh database starts with 0 donations.
@@ -100,7 +101,7 @@ It also adds 3 sample campaigns (Education Support, Food Distribution, Medical C
 - The "come back after login" link only accepts pages on this site (no redirect to other websites).
 - All database queries use parameters. All text shown on pages is escaped.
 
-## Tests (99)
+## Tests (105)
 ```
 set DB_NAME=ngo_donation_test        (PowerShell: $env:DB_NAME="ngo_donation_test")
 python init_db.py

@@ -52,7 +52,7 @@ class Base(unittest.TestCase):
         self.cleanup()
         self.owner = sql("SELECT user_id FROM users WHERE email='campaign.admin@example.com'")[0]["user_id"]
         sql("INSERT INTO campaigns (title, description, category, goal_amount, created_by) VALUES (%s,%s,%s,%s,%s)",
-            (TITLE, "A test campaign used only by the automated tests of Module 4.", "food", 1000, self.owner))
+            (TITLE, "A test campaign used only by the automated tests of Module 4.", "food", 5000, self.owner))
         self.cid = sql("SELECT campaign_id FROM campaigns WHERE title=%s", (TITLE,))[0]["campaign_id"]
         h = generate_password_hash(PASSWORD, method="pbkdf2:sha256")
         for name, email, role in (("Other Admin", OTHER_ADMIN, "campaign_admin"),

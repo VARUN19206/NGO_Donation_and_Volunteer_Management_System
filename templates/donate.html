@@ -17,6 +17,7 @@
         <p class="muted">{{ c.description|replace('\n', ' ')|truncate(150) }}</p>
         <div class="progress" role="progressbar" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ pct }}%"></span></div>
         <div class="progress-row"><span><strong>{{ c.raised|inr }}</strong> raised</span><span>Goal {{ c.goal_amount|inr }}</span></div>
+        <p class="muted small">Still needed: <strong>{{ left|inr }}</strong></p>
       </div>
     </article>
 
@@ -37,6 +38,7 @@
             <span class="prefix">₹</span>
             <input id="amount" name="amount" type="text" inputmode="decimal" autocomplete="off" placeholder="Enter amount" value="{{ entered }}" required autofocus>
           </div>
+          <small class="hint">You can donate up to {{ left|inr }}. A larger amount is rejected.</small>
           <div class="chips" aria-label="Quick amounts">
             {% for q in quick %}<button type="button" class="chip" data-amount="{{ q }}">₹{{ '{:,}'.format(q) }}</button>{% endfor %}
           </div>

@@ -12,7 +12,7 @@ from flask import (Blueprint, Response, abort, flash, redirect, render_template,
 
 import db
 from auth import role_required
-from campaigns import get_campaign
+from campaigns import get_campaign, inr
 from receipt import build_receipt
 
 bp = Blueprint("donations", __name__)
@@ -40,6 +40,48 @@ def parse_amount(text):
     return amount, None
 
 
+def still_needed(campaign):
+    """How much more the campaign can accept before it reaches its goal."""
+    return max(Decimal("0"), campaign["goal_amount"] - campaign["raised"])
+
+
+def save_donation(campaign_id, donor_id, amount):
+    """Save a donation only if it does not push the campaign past its goal.
+
+    The campaign row is locked while we check, so two donors paying at the same
+    moment cannot both squeeze past the goal.
+    Returns (donation_id, None) or (None, amount_still_needed).
+    """
+    conn = db.get_db()
+    conn.begin()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT goal_amount FROM campaigns WHERE campaign_id = %s FOR UPDATE", (campaign_id,))
+            goal = cur.fetchone()["goal_amount"]
+            cur.execute("SELECT COALESCE(SUM(amount), 0) AS raised FROM donations WHERE campaign_id = %s",
+                        (campaign_id,))
+            left = max(Decimal("0"), goal - cur.fetchone()["raised"])
+            if amount > left:
+                conn.rollback()
+                return None, left
+            for _ in range(5):                  # retry in the very unlikely case of a reference clash
+                try:
+                    cur.execute(
+                        "INSERT INTO donations (campaign_id, donor_id, amount, transaction_ref) "
+                        "VALUES (%s, %s, %s, %s)", (campaign_id, donor_id, amount, new_reference()))
+                    donation_id = cur.lastrowid
+                    conn.commit()
+                    return donation_id, None
+                except pymysql.err.IntegrityError as exc:
+                    if "uq_donations_ref" not in str(exc):
+                        raise
+            conn.rollback()
+            abort(500)
+    except Exception:
+        conn.rollback()
+        raise
+
+
 @bp.route("/campaigns/<int:campaign_id>/donate", methods=["GET", "POST"])
 @role_required("donor", message=ONLY_DONORS)
 def donate(user, campaign_id):
@@ -49,32 +91,30 @@ def donate(user, campaign_id):
     if campaign["status"] != "active":
         flash("This campaign is closed and is not accepting donations.", "error")
         return redirect(url_for("campaigns.detail", campaign_id=campaign_id))
+    if still_needed(campaign) < MIN_AMOUNT:
+        flash("This campaign has reached its goal and is not accepting more donations. Thank you!", "error")
+        return redirect(url_for("campaigns.detail", campaign_id=campaign_id))
 
-    entered = ""
+    def page(entered, status=200):
+        left = still_needed(campaign)
+        return render_template("donate.html", c=campaign, entered=entered, left=left,
+                               quick=[q for q in QUICK_AMOUNTS if q <= left],
+                               active_nav="campaigns"), status
+
     if request.method == "POST":
         entered = request.form.get("amount", "")
         amount, error = parse_amount(entered)
         if error:
             flash(error, "error")
-            return render_template("donate.html", c=campaign, entered=entered,
-                                   quick=QUICK_AMOUNTS, active_nav="campaigns"), 400
-        donation_id = None
-        for _ in range(5):                      # retry in the very unlikely case of a clash
-            try:
-                donation_id = db.execute(
-                    "INSERT INTO donations (campaign_id, donor_id, amount, transaction_ref) "
-                    "VALUES (%s, %s, %s, %s)",
-                    (campaign_id, user["user_id"], amount, new_reference()))
-                break
-            except pymysql.err.IntegrityError as exc:
-                if "uq_donations_ref" not in str(exc):
-                    raise
+            return page(entered, 400)
+        donation_id, left = save_donation(campaign_id, user["user_id"], amount)
         if donation_id is None:
-            abort(500)
+            flash(f"Payment rejected. {inr(amount)} is more than the {inr(left)} still needed to reach the goal. "
+                  f"Please donate {inr(left)} or less.", "error")
+            return page(entered, 400)
         return redirect(url_for("donations.confirmation", donation_id=donation_id))
 
-    return render_template("donate.html", c=campaign, entered=entered,
-                           quick=QUICK_AMOUNTS, active_nav="campaigns")
+    return page("")
 
 
 @bp.route("/donations/<int:donation_id>")

@@ -122,8 +122,14 @@ class DonationTests(unittest.TestCase):
 
     def test_decimal_and_comma_amounts_accepted(self):
         self.login()
-        self.assertEqual(self.donate("1,250.50").status_code, 302)
-        self.assertEqual(float(sql("SELECT amount FROM donations WHERE campaign_id=%s", (self.cid,))[0]["amount"]), 1250.50)
+        self.assertEqual(self.donate("250.50").status_code, 302)
+        self.assertEqual(self.donate("749.50").status_code, 302)       # together exactly the 1,000 goal
+        self.assertEqual(float(sql("SELECT SUM(amount) s FROM donations WHERE campaign_id=%s", (self.cid,))[0]["s"]), 1000.0)
+
+    def test_comma_amount_accepted(self):
+        self.login()
+        self.assertEqual(self.donate("1,000").status_code, 302)
+        self.assertEqual(float(sql("SELECT amount FROM donations WHERE campaign_id=%s", (self.cid,))[0]["amount"]), 1000.0)
 
     def test_only_donors_can_donate(self):
         for email, tab in (("volunteer@example.com", "volunteer"),
@@ -194,12 +200,66 @@ class DonationTests(unittest.TestCase):
         self.assertIn("25%", detail)
         self.assertIn("width: 25%", public.get("/campaigns").get_data(as_text=True))
 
-    def test_progress_is_capped_at_100(self):
+    def test_progress_reaches_100_at_goal(self):
         self.login()
-        self.donate("5000")
+        self.assertEqual(self.donate("1000").status_code, 302)      # goal is 1000
         detail = create_app().test_client().get(f"/campaigns/{self.cid}").get_data(as_text=True)
         self.assertIn("width: 100%", detail)
-        self.assertNotIn("500%", detail)
+        self.assertIn("Goal reached", detail)
+        self.assertNotIn("Donate Now", detail)
+
+    def test_donation_above_goal_is_rejected(self):
+        self.login()
+        r = self.donate("5000")                                      # goal is 1000
+        self.assertEqual(r.status_code, 400)
+        page = r.get_data(as_text=True)
+        self.assertIn("Payment rejected", page)
+        self.assertIn("₹1,000 or less", page)
+        self.assertEqual(self.count(), 0)
+
+    def test_only_the_remaining_amount_is_accepted(self):
+        self.login()
+        self.assertEqual(self.donate("700").status_code, 302)
+        r = self.donate("400")                                       # only 300 still needed
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("₹300 or less", r.get_data(as_text=True))
+        self.assertEqual(self.count(), 1)
+        self.assertEqual(self.donate("300").status_code, 302)        # exactly the rest is fine
+        self.assertEqual(float(sql("SELECT SUM(amount) s FROM donations WHERE campaign_id=%s", (self.cid,))[0]["s"]), 1000.0)
+
+    def test_full_campaign_accepts_no_more(self):
+        self.login()
+        self.donate("1000")
+        for method in ("get", "post"):
+            if method == "get":
+                r = self.client.get(f"/campaigns/{self.cid}/donate")
+            else:
+                r = self.client.post(f"/campaigns/{self.cid}/donate",
+                                     data={"amount": "1", "csrf_token": self.token("/campaigns")})
+            self.assertEqual(r.status_code, 302)
+        self.assertEqual(self.count(), 1)
+
+    def test_donate_page_shows_amount_still_needed(self):
+        self.login()
+        self.donate("250")
+        page = self.client.get(f"/campaigns/{self.cid}/donate").get_data(as_text=True)
+        self.assertIn("Still needed", page)
+        self.assertIn("₹750", page)
+
+    def test_two_donors_at_once_cannot_pass_the_goal(self):
+        import threading
+        results = []
+        def worker(email):
+            c = create_app().test_client()
+            tok = re.search(r'name="csrf_token" value="([^"]+)"', c.get("/login").get_data(as_text=True)).group(1)
+            c.post("/login", data={"email": email, "password": PASSWORD, "role": "donor", "csrf_token": tok})
+            tok = re.search(r'name="csrf_token" value="([^"]+)"',
+                            c.get(f"/campaigns/{self.cid}/donate").get_data(as_text=True)).group(1)
+            results.append(c.post(f"/campaigns/{self.cid}/donate", data={"amount": "800", "csrf_token": tok}).status_code)
+        ts = [threading.Thread(target=worker, args=(e,)) for e in ("donor@example.com", DONOR2)]
+        [t.start() for t in ts]; [t.join() for t in ts]
+        self.assertEqual(sorted(results), [302, 400])
+        self.assertEqual(self.count(), 1)
 
     def test_donate_button_visibility(self):
         public = create_app().test_client().get(f"/campaigns/{self.cid}").get_data(as_text=True)

@@ -33,6 +33,8 @@
         <div class="progress big" role="progressbar" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ pct }}%"></span></div>
         {% if c.status != 'active' %}
           <p class="muted small">This campaign is closed and is not accepting donations.</p>
+        {% elif (c.goal_amount - c.raised) < 1 %}
+          <p class="muted small">{{ icon('check', 14) }} Goal reached. This campaign is not accepting more donations. Thank you to all donors!</p>
         {% elif nav_user and nav_user.role != 'donor' %}
           <p class="muted small">Only donors can make donations.</p>
         {% else %}
